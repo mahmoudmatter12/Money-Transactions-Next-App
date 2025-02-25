@@ -26,6 +26,13 @@ body {
   justify-content: center;
 }
 
+.center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+}
+
 .navbar {
   background: #000;
   color: #fff;
@@ -45,6 +52,9 @@ body {
   cursor: pointer;
 }
 
+.guest button {
+  background: #000;
+}
 .navbar button:hover {
   opacity: 0.9;
 }

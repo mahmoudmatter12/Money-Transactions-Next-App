@@ -7,7 +7,7 @@ const Header = async () => {
       <nav className="navbar">
         <div className="navbar-container">
             <h2>
-                Logo
+                My Expense Tracker
             </h2>
             <div>
                 <SignedOut>
