@@ -3,19 +3,24 @@ import addTransaction from "@/app/actions/AddTransaction";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
-const AddTransaction = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+interface TransactionResponse {
+  error?: string;
+  success?: boolean;
+}
 
-  const clientAction = async (formData: FormData) => {
-    setIsSubmitting(true); // Disable the button when the form is submitted
+export const AddTransaction = () => {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  const clientAction = async (formData: FormData, form: HTMLFormElement) => {
     try {
-      const res = await addTransaction(formData);
+      setIsSubmitting(true); // Disable the button when the form is submitted
+      const res: TransactionResponse = await addTransaction(formData);
 
       if (res.error) {
         toast.error(res.error);
       } else {
         toast.success("Transaction added successfully");
+        form.reset(); // Reset the form after successful submission
       }
     } catch (error) {
       toast.error("An error occurred while adding the transaction");
@@ -27,7 +32,13 @@ const AddTransaction = () => {
   return (
     <>
       <h3>Add transaction</h3>
-      <form action={clientAction}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault(); // Prevent default form submission
+          const form = e.target as HTMLFormElement;
+          clientAction(new FormData(form), form);
+        }}
+      >
         <div className="form-control">
           <label htmlFor="text">Text</label>
           <input
@@ -51,12 +62,15 @@ const AddTransaction = () => {
             required
           />
         </div>
-        <button className="btn" type="submit" disabled={isSubmitting}>
+        <button
+          className={`btn ${isSubmitting ? "bg-red-500" : "bg-blue-300"}`}
+          disabled={isSubmitting}
+          aria-disabled={isSubmitting}
+          aria-busy={isSubmitting}
+        >
           {isSubmitting ? "Adding..." : "Add transaction"}
         </button>
       </form>
     </>
   );
 };
-
-export default AddTransaction;
