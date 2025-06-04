@@ -38,7 +38,8 @@ async function addTransaction(formData: FormData): Promise<TransactionDataRespon
         revalidatePath('/');
         return { data: transactionData };
         
-    } catch (error) {
+    } catch (error:any) {
+        console.error('Error adding transaction:', error);
         return { error: 'An error occurred while adding the transaction' };
     }
 

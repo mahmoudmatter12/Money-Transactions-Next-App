@@ -29,7 +29,8 @@ async function getIncomeExpense(): Promise<{
       .reduce((acc, item) => acc + item, 0);
 
     return { income, expense: Math.abs(expense) };
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error fetching income and expense:', error);
     return { error: 'Database error' };
   }
 }

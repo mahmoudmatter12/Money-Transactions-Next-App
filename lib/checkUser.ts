@@ -4,56 +4,94 @@ import { db } from "@/lib/db";
 export default async function checkUser() {
   const user = await currentUser();
 
+  // First check if authenticated or not 
+  if (!user) {
+    return null;
+  }
 
-//!   first check of the authenticated or not 
-//!   then get the logged in user in constant to check if user exists in database
-//!   then check if user exists in database
-//!   if user exists in database then return user
-//!   else add the user to the database and return user
+  // Then check if user exists in database by ClerkId
+  const dbUser = await db.user.findUnique({
+    where: {
+      ClerkId: user.id,
+    },
+  });
 
+  // If user exists in database then return user
+  if (dbUser) {
+    return dbUser;
+  }
 
-//  first check of the authenticated or not
-    if (!user) {
-        return null;
-    }
-    
+  // Check if user exists by email as well
+  const dbUserByEmail = await db.user.findUnique({
+    where: {
+      email: user.emailAddresses[0].emailAddress,
+    },
+  });
 
-
-//  then check if user exists in database
-    const dbUser = await db.user.findUnique({
-        where: {
-            id: user.id,
-        },
+  // If user exists by email, update ClerkId and return user
+  if (dbUserByEmail) {
+    const updatedUser = await db.user.update({
+      where: {
+        email: user.emailAddresses[0].emailAddress,
+      },
+      data: {
+        ClerkId: user.id,
+        name: user.fullName,
+        imgUrl: user.imageUrl,
+      },
     });
+    return updatedUser;
+  }
 
-//  if user exists in database then return user
-    if (dbUser) {
-        return dbUser;
-    }
-
-//  else add the user to the database and return user
-try {
+  // Else add the user to the database and return user
+  try {
     const newUser = await db.user.create({
-        data: {
-            ClerkId: user.id,
-            name: user.fullName,
-            imgUrl: user.imageUrl,
-            email: user.emailAddresses[0].emailAddress,
-        },
+      data: {
+        ClerkId: user.id,
+        name: user.fullName,
+        imgUrl: user.imageUrl,
+        email: user.emailAddresses[0].emailAddress,
+      },
     });
 
     return newUser;
-} catch (error: any) {
-    if (error.code === 'P2002' && error.meta?.target?.includes('ClerkId')) {
-        // User already exists, fetch the existing user
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      // Handle unique constraint violations
+      if (error.meta?.target?.includes('ClerkId')) {
+        // User already exists with this ClerkId, fetch the existing user
         const existingUser = await db.user.findUnique({
-            where: {
-                ClerkId: user.id,
-            },
+          where: {
+            ClerkId: user.id,
+          },
         });
         return existingUser;
+      } else if (error.meta?.target?.includes('email')) {
+        // User already exists with this email, fetch and update the existing user
+        const existingUser = await db.user.findUnique({
+          where: {
+            email: user.emailAddresses[0].emailAddress,
+          },
+        });
+        
+        if (existingUser) {
+          // Update the existing user with new ClerkId
+          const updatedUser = await db.user.update({
+            where: {
+              email: user.emailAddresses[0].emailAddress,
+            },
+            data: {
+              ClerkId: user.id,
+              name: user.fullName,
+              imgUrl: user.imageUrl,
+            },
+          });
+          return updatedUser;
+        }
+        
+        return existingUser;
+      }
     }
     throw error;
-}
-
+  }
 }

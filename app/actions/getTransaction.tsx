@@ -22,7 +22,8 @@ async function getTransactions(): Promise<{
     });
 
     return { transactions };
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error fetching transactions:', error);
     return { error: 'Database error' };
   }
 }

@@ -1,8 +1,6 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { promises } from "dns";
-
 async function getUserBalance(): Promise<{
     balance?: number;
     error?: string;
@@ -22,7 +20,8 @@ async function getUserBalance(): Promise<{
             (sum, transaction) => sum + transaction.amount,0
         );
         return { balance };
-    } catch (error) {
+    } catch (error: any) {
+        console.error("Error fetching user balance:", error);
         return { error: "An error occurred while getting your balance" };
     }
 }

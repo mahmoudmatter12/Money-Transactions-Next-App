@@ -24,7 +24,8 @@ async function deleteTransaction(transactionId: string): Promise<{
     revalidatePath('/');
 
     return { message: 'Transaction deleted' };
-  } catch (error) {
+  } catch (error:any) {
+    console.error('Error deleting transaction:', error);
     return { error: 'Database error' };
   }
 }
