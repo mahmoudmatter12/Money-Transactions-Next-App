@@ -22,7 +22,8 @@ export const AddTransaction = () => {
         toast.success("Transaction added successfully");
         form.reset(); // Reset the form after successful submission
       }
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: any) {
       toast.error("An error occurred while adding the transaction");
     } finally {
       setIsSubmitting(false); // Re-enable the button after the request is complete
